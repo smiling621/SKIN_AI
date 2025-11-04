@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Welcome Admin{% endblock %}
+{% block content %}
+<div class="row">
+  <div class="col-md-6 mb-3">
+    <div class="card text-white bg-primary p-3">
+      <h4>Total Users</h4>
+      <p class="fs-3">{{ users }}</p>
+    </div>
+  </div>
+  <div class="col-md-6 mb-3">
+    <div class="card text-white bg-success p-3">
+      <h4>Total Predictions</h4>
+      <p class="fs-3">{{ preds }}</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

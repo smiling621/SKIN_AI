@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Reset User Password{% endblock %}
+{% block page_title %}Reset User Password{% endblock %}
+
+{% block content %}
+<div class="card shadow rounded-4 p-4">
+  <h4>Reset Password for User: <strong>{{ user.username }}</strong></h4>
+
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <div class="alert alert-info">
+        {{ messages[0] }}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+<form method="POST" action="{{ url_for('admin_bp.reset_user_password', user_id=user.user_id) }}">
+    <div class="mb-3">
+      <label for="new_password" class="form-label">New Password</label>
+      <input
+        type="password"
+        class="form-control"
+        id="new_password"
+        name="new_password"
+        required
+      >
+    </div>
+    <button type="submit" class="btn btn-success">Reset Password</button>
+    <a href="{{ url_for('admin_bp.users') }}" class="btn btn-secondary ms-2">Cancel</a>
+  </form>
+</div>
+{% endblock %}

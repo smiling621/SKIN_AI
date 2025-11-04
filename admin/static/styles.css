@@ -1,0 +1,16 @@
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.navbar {
+  border-bottom: 1px solid #ddd;
+}
+
+.card {
+  border-radius: 12px;
+}
+
+table {
+  border-radius: 10px;
+  overflow: hidden;
+}

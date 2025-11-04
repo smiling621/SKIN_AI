@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Staff Dashboard{% endblock %}
+{% block page_title %}Your Predictions{% endblock %}
+
+{% block content %}
+  <h3>Hello, {{ session.username }}!</h3>
+
+  {% if preds %}
+  <table class="table table-striped mt-3">
+    <thead>
+      <tr>
+        <th>Image</th>
+        <th>Result</th>
+        <th>Confidence</th>
+        <th>Timestamp</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for pred in preds %}
+      <tr>
+        <td>{{ pred.image_name }}</td>
+        <td>{{ pred.result }}</td>
+        <td>{{ "%.2f"|format(pred.confidence * 100) }}%</td>
+        <td>{{ pred.timestamp }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>No predictions found.</p>
+  {% endif %}
+{% endblock %}
