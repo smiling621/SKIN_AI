@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Skin Quiz - Derma Soul</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      padding: 2rem;
+      color: #333;
+      margin: 0;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 0 30px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #d6336c, #c0255a);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+    
+    h2 {
+      margin: 0;
+      font-size: 2rem;
+      font-weight: 300;
+    }
+    
+    .subtitle {
+      margin-top: 10px;
+      opacity: 0.9;
+      font-size: 1.1rem;
+    }
+    
+    .content {
+      padding: 30px;
+    }
+    
+    .question-group {
+      background: #f8f9fa;
+      padding: 25px;
+      margin-bottom: 25px;
+      border-radius: 12px;
+      border-left: 4px solid #d6336c;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .question-group h3 {
+      color: #d6336c;
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-size: 1.3rem;
+      border-bottom: 2px solid #eee;
+      padding-bottom: 10px;
+    }
+    
+    .question {
+      margin-bottom: 20px;
+    }
+    
+    .question label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #444;
+      font-size: 1rem;
+    }
+    
+    select {
+      width: 100%;
+      padding: 12px;
+      margin-top: 5px;
+      margin-bottom: 15px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+      background: white;
+      transition: border-color 0.3s ease;
+    }
+    
+    select:focus {
+      outline: none;
+      border-color: #d6336c;
+      box-shadow: 0 0 0 3px rgba(214, 51, 108, 0.1);
+    }
+    
+    select:invalid {
+      border-color: #dc3545;
+    }
+    
+    .button-group {
+      text-align: center;
+      padding: 20px 0;
+      border-top: 1px solid #eee;
+      margin-top: 20px;
+    }
+    
+    button {
+      background: linear-gradient(135deg, #d6336c, #c0255a);
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      border-radius: 8px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(214, 51, 108, 0.3);
+    }
+    
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    
+    .back-button {
+      background: linear-gradient(135deg, #6c757d, #5a6268);
+      margin-right: 15px;
+      padding: 12px 30px;
+      font-size: 16px;
+    }
+    
+    .back-button:hover {
+      box-shadow: 0 8px 25px rgba(108, 117, 125, 0.3);
+    }
+    
+    .progress-info {
+      background: #e3f2fd;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      text-align: center;
+      color: #1976d2;
+      font-weight: 600;
+    }
+    
+    .error-message {
+      background: #f8d7da;
+      color: #721c24;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+      border-left: 4px solid #dc3545;
+    }
+    
+    .loading {
+      display: none;
+      text-align: center;
+      margin: 20px 0;
+      color: #d6336c;
+      font-weight: 600;
+    }
+    
+    .loading::after {
+      content: '';
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #d6336c;
+      border-radius: 50%;
+      border-top-color: transparent;
+      animation: spin 1s ease-in-out infinite;
+      margin-left: 10px;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h2>Personalized Skin Quiz</h2>
+      <div class="subtitle">Help us understand your skin better for personalized recommendations</div>
+    </div>
+    
+    <div class="content">
+      <div class="progress-info" id="progressInfo">
+        Loading your personalized questions...
+      </div>
+
+      <div id="errorMessage" class="error-message" style="display: none;"></div>
+      
+      <form id="quizForm" method="POST" action="/quiz">
+        <div id="quizContainer">
+          <!-- Questions will be loaded here by JavaScript -->
+        </div>
+        
+        <div class="loading" id="loadingIndicator">
+          Submitting your responses...
+        </div>
+        
+        <div class="button-group">
+          <button type="button" class="back-button" onclick="goBack()">← Back to Analysis</button>
+          <button type="submit" id="submitButton">Complete Quiz →</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+  
+       // Get parameters from Flask template variables
+    const skinType = '{{ skin_type }}' || 'normal';
+    const acne = '{{ acne }}' || 'no_acne';
+    const customerName = '{{ customer_name }}' || 'User';
+
+    const quizContainer = document.getElementById("quizContainer");
+    const progressInfo = document.getElementById("progressInfo");
+    const errorMessage = document.getElementById("errorMessage");
+    const submitButton = document.getElementById("submitButton");
+    const loadingIndicator = document.getElementById("loadingIndicator");
+
+    // Questions data (keep all the existing questions object as it is)
+    const questions = {
+      skinType: {
+        oil: [
+          { q: "How often do you wash your face daily?", name: "oil_wash_frequency", options: ["Once", "Twice", "Three times", "More than three times"] },
+          { q: "How shiny does your T-zone get during the day?", name: "oil_tzone_shine", options: ["Very shiny within 2 hours", "Moderately shiny by midday", "Slightly shiny by evening", "Not shiny at all"] },
+          { q: "How often do you use oil-control products?", name: "oil_oil_control", options: ["Daily", "2-3 times per week", "Weekly", "Never"] },
+          { q: "How do you feel about using moisturizer?", name: "oil_moisturizer", options: ["I avoid it completely", "I use very light moisturizers", "I use regular moisturizers", "I use heavy moisturizers"] },
+          { q: "How visible are your pores?", name: "oil_pores", options: ["Very visible and large", "Moderately visible", "Slightly visible", "Not visible"] }
+        ],
+        dry: [
+          { q: "How often do you moisturize your face?", name: "dry_moisturize_frequency", options: ["Multiple times daily", "Twice daily", "Once daily", "Few times per week"] },
+          { q: "Do you experience tightness after cleansing?", name: "dry_tightness", options: ["Always", "Often", "Sometimes", "Never"] },
+          { q: "How often do you notice flaky or peeling skin?", name: "dry_flakiness", options: ["Daily", "Weekly", "Monthly", "Rarely"] },
+          { q: "What type of cleanser do you prefer?", name: "dry_cleanser", options: ["Cream or oil-based", "Gentle foam", "Regular foam", "Strong cleansers"] },
+          { q: "How does your skin feel in air-conditioned rooms?", name: "dry_ac_rooms", options: ["Very tight and uncomfortable", "Somewhat tight", "Normal", "No difference"] }
+        ],
+        normal: [
+          { q: "How consistent is your skincare routine?", name: "normal_routine_consistency", options: ["Very consistent daily", "Mostly consistent", "Somewhat consistent", "Inconsistent"] },
+          { q: "How often do you use sunscreen?", name: "normal_sunscreen", options: ["Daily", "When going out", "Occasionally", "Never"] },
+          { q: "How does your skin react to new products?", name: "normal_product_reaction", options: ["Very sensitive", "Mildly sensitive", "Generally tolerant", "Never reacts"] },
+          { q: "How often do you exfoliate?", name: "normal_exfoliation", options: ["2-3 times per week", "Weekly", "Monthly", "Never"] },
+          { q: "How would you describe your overall skin health?", name: "normal_skin_health", options: ["Excellent", "Good", "Fair", "Needs improvement"] }
+        ]
+      },
+
+      acne: {
+        no_acne: [
+          { q: "What's your primary skincare goal?", name: "no_acne_goal", options: ["Maintain healthy skin", "Anti-aging", "Improve skin texture", "Address pigmentation"] },
+          { q: "How often do you cleanse your face?", name: "no_acne_cleanse", options: ["Twice daily", "Once daily", "More than twice", "Irregularly"] },
+          { q: "Do you follow a preventive skincare routine?", name: "no_acne_prevention", options: ["Yes, very diligent", "Yes, mostly", "Sometimes", "No routine"] },
+          { q: "How important is sun protection to you?", name: "no_acne_sun_protection", options: ["Very important, daily use", "Important, regular use", "Somewhat important", "Not important"] }
+        ],
+        mild: [
+          { q: "Where do you typically get breakouts?", name: "mild_acne_location", options: ["T-zone (forehead, nose, chin)", "Cheeks", "Jawline", "All over face"] },
+          { q: "How often do you experience breakouts?", name: "mild_acne_frequency", options: ["Few times per month", "Weekly", "Daily", "Rarely"] },
+          { q: "What triggers your breakouts most?", name: "mild_acne_triggers", options: ["Hormonal changes", "Stress", "Diet", "Product reactions"] },
+          { q: "Do you currently use any acne treatments?", name: "mild_acne_treatment", options: ["Over-the-counter products", "Prescription medication", "Natural remedies", "No treatment"] },
+          { q: "How do you handle existing pimples?", name: "mild_acne_handling", options: ["Leave them alone", "Use spot treatments", "Pick or pop them", "Cover with makeup"] }
+        ],
+        moderate: [
+          { q: "How many breakouts do you typically have?", name: "moderate_acne_count", options: ["5-10 at a time", "10-20 at a time", "20+ at a time", "Varies greatly"] },
+          { q: "Do you experience inflamed or painful pimples?", name: "moderate_acne_inflammation", options: ["Very often", "Sometimes", "Rarely", "Never"] },
+          { q: "Have you consulted a dermatologist?", name: "moderate_acne_dermatologist", options: ["Yes, currently seeing one", "Yes, but not recently", "Planning to", "No"] },
+          { q: "How does acne affect your daily life?", name: "moderate_acne_impact", options: ["Significantly impacts confidence", "Moderately affects me", "Slightly bothersome", "Doesn't affect me much"] },
+          { q: "What type of acne products do you use?", name: "moderate_acne_products", options: ["Prescription strength", "Strong over-the-counter", "Gentle products", "Multiple products"] }
+        ],
+        severe: [
+          { q: "Are you under professional dermatological care?", name: "severe_acne_professional", options: ["Yes, regular visits", "Yes, occasional visits", "Planning to start", "No professional care"] },
+          { q: "Do you experience cystic or nodular acne?", name: "severe_acne_type", options: ["Frequently", "Sometimes", "Rarely", "Never"] },
+          { q: "How long have you been dealing with severe acne?", name: "severe_acne_duration", options: ["Less than 6 months", "6 months to 1 year", "1-3 years", "3+ years"] },
+          { q: "Have you tried prescription medications?", name: "severe_acne_medication", options: ["Yes, multiple types", "Yes, one type", "Planning to try", "No, not interested"] },
+          { q: "How much does acne impact your quality of life?", name: "severe_acne_life_impact", options: ["Severely impacts daily activities", "Moderately impacts social life", "Affects confidence only", "Learning to manage"] }
+        ],
+        very_severe: [
+          { q: "Are you currently on advanced acne treatments?", name: "very_severe_treatment", options: ["Yes, isotretinoin", "Yes, other prescription", "Yes, combination therapy", "No advanced treatment"] },
+          { q: "Do you experience extensive scarring?", name: "very_severe_scarring", options: ["Yes, significant scarring", "Yes, moderate scarring", "Some scarring", "No scarring yet"] },
+          { q: "How often do you see your dermatologist?", name: "very_severe_visits", options: ["Monthly or more", "Every 2-3 months", "Every 6 months", "Rarely"] },
+          { q: "Do you follow a strict skincare regimen?", name: "very_severe_regimen", options: ["Yes, very strict routine", "Yes, mostly consistent", "Somewhat consistent", "Struggling with routine"] },
+          { q: "How do you cope with the emotional impact?", name: "very_severe_coping", options: ["Professional support", "Family/friend support", "Self-management", "Struggling to cope"] }
+        ]
+      }
+    };
+
+    // Helper to create HTML for each question
+    function createQuestionHTML(question, index) {
+      let optionsHTML = '<option value="">-- Please Select --</option>';
+      question.options.forEach(opt => {
+        const val = opt.toLowerCase().replace(/[^a-z0-9]/g, '_');
+        optionsHTML += `<option value="${val}">${opt}</option>`;
+      });
+      
+      return `
+        <div class="question">
+          <label for="${question.name}">${index + 1}. ${question.q}</label>
+          <select name="${question.name}" id="${question.name}" required>
+            ${optionsHTML}
+          </select>
+        </div>
+      `;
+    }
+
+    // Render questions based on session data
+    function renderQuestions() {
+      console.log(`Rendering questions for skinType: ${skinType}, acne: ${acne}`); // Debug log
+      
+      quizContainer.innerHTML = "";
+      let totalQuestions = 0;
+
+      // Add skin type questions
+      if (questions.skinType[skinType]) {
+        const skinQuestions = questions.skinType[skinType];
+        quizContainer.innerHTML += `<div class="question-group">
+          <h3>Questions About Your ${skinType.charAt(0).toUpperCase() + skinType.slice(1)} Skin</h3>`;
+        
+        skinQuestions.forEach((q, index) => {
+          quizContainer.innerHTML += createQuestionHTML(q, totalQuestions + index);
+        });
+        quizContainer.innerHTML += `</div>`;
+        totalQuestions += skinQuestions.length;
+      }
+
+      // Add acne questions
+      if (questions.acne[acne]) {
+        const acneQuestions = questions.acne[acne];
+        const acneTitle = acne === 'no_acne' ? 'General Skin Care' : 
+                         acne.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) + ' Acne';
+        
+        quizContainer.innerHTML += `<div class="question-group">
+          <h3>Questions About ${acneTitle}</h3>`;
+        
+        acneQuestions.forEach((q, index) => {
+          quizContainer.innerHTML += createQuestionHTML(q, totalQuestions + index);
+        });
+        quizContainer.innerHTML += `</div>`;
+        totalQuestions += acneQuestions.length;
+      }
+
+      progressInfo.innerHTML = `Personalized quiz for ${customerName} | ${totalQuestions} questions based on your ${skinType} skin and ${acne.replace('_', ' ')} condition`;
+      progressInfo.style.display = 'block';
+
+      if (totalQuestions === 0) {
+        showError("No questions available for your skin profile. Please try analyzing your skin again.");
+      }
+    }
+
+    // Handle form submission
+    document.getElementById('quizForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const selects = this.querySelectorAll('select[required]');
+      let allValid = true;
+      
+      selects.forEach(select => {
+        if (!select.value) {
+          select.style.borderColor = '#dc3545';
+          allValid = false;
+        } else {
+          select.style.borderColor = '#ddd';
+        }
+      });
+
+      if (!allValid) {
+        showError('Please answer all questions before submitting.');
+        return;
+      }
+
+      submitButton.disabled = true;
+      submitButton.textContent = 'Processing...';
+      loadingIndicator.style.display = 'block';
+      hideError();
+
+      const formData = new FormData(this);
+      
+      fetch('/quiz', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => {
+        if (response.redirected) {
+          window.location.href = response.url;
+          return;
+        }
+        return response.text();
+      })
+      .then(html => {
+        if (html) {
+          window.location.href = '/suggestions';
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showError('Network error. Please check your connection and try again.');
+      })
+      .finally(() => {
+        submitButton.disabled = false;
+        submitButton.textContent = 'Complete Quiz →';
+        loadingIndicator.style.display = 'none';
+      });
+    });
+
+    function showError(message) {
+      errorMessage.textContent = message;
+      errorMessage.style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function hideError() {
+      errorMessage.style.display = 'none';
+    }
+
+    function goBack() {
+      window.location.href = '/suggestions';
+    }
+
+    // Initialize quiz when page loads
+    renderQuestions();
+  </script>
+</body>
+</html>

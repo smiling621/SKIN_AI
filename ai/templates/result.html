@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Derma Soul - Result</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f7f9fc;
+      margin: 2rem;
+      color: #333;
+    }
+
+    h2 {
+      color: #d6336c;
+      margin-bottom: 1rem;
+    }
+
+    .result-box {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(214, 51, 108, 0.1);
+      margin-bottom: 20px;
+    }
+
+    .next-button, .try-again-button {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #d6336c;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      text-decoration: none;
+      font-size: 16px;
+    }
+
+    .next-button:hover, .try-again-button:hover {
+      background-color: #c0265c;
+    }
+
+    .try-again-button {
+      background-color: #ff6b35;
+    }
+
+    .try-again-button:hover {
+      background-color: #e55a2b;
+    }
+
+    .no-face-icon {
+      font-size: 48px;
+      text-align: center;
+      margin-bottom: 15px;
+      color: #ff6b35;
+    }
+
+    .no-face-message {
+      text-align: center;
+      color: #666;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Analysis Result for {{ customer_name }}</h2>
+
+  {% if face_detected == 'no' %}
+    <div class="result-box">
+      <div class="no-face-icon">📷</div>
+      <h3 style="text-align: center; color: #ff6b35;">No face detected</h3>
+      <div class="no-face-message">
+        <p>We couldn't detect a clear face in your uploaded image.</p>
+        <p>Please make sure:</p>
+        <ul style="text-align: left; display: inline-block;">
+          <li>Your face is clearly visible and well-lit</li>
+          <li>You're looking directly at the camera</li>
+          <li>The image is not blurry or too dark</li>
+          <li>There are no obstructions covering your face</li>
+        </ul>
+      </div>
+      <div style="text-align: center;">
+        <a href="{{ url_for('ai.analyzer') }}" class="try-again-button">
+          🔄 Try Again
+        </a>
+      </div>
+    </div>
+  {% else %}
+    <div class="result-box">
+      <h3>Skin Type: {{ skin_type | capitalize }}</h3>
+    </div>
+
+    <div class="result-box">
+      <h3>Acne Severity: {{ acne | replace('_', ' ') | capitalize }}</h3>
+    </div>
+
+    <form method="get" action="{{ url_for('ai.quiz') }}">
+      <button class="next-button" type="submit">Next → Quiz</button>
+    </form>
+  {% endif %}
+
+</body>
+</html>

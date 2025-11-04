@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Derma Soul - Suggestions</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f7f9fc;
+      margin: 2rem;
+      color: #333;
+    }
+
+    h2 {
+      color: #d6336c;
+      margin-bottom: 1rem;
+    }
+
+    .suggestion-box {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(214, 51, 108, 0.1);
+      margin-bottom: 20px;
+    }
+
+    .suggestion-box h3 {
+      margin-top: 0;
+      color: #444;
+    }
+
+    ul {
+      margin-left: 20px;
+    }
+
+    .back-button {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #d6336c;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .back-button:hover {
+      background-color: #c0265c;
+    }
+
+    .feedback-button {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #17a2b8;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .feedback-button:hover {
+      background-color: #138496;
+    }
+
+    .logout-button {
+      background-color: #6c757d;
+    }
+
+    .logout-button:hover {
+      background-color: #5a6268;
+    }
+
+    .quiz-suggestions {
+      background-color: #e8f5e8;
+      border-left: 4px solid #4caf50;
+      padding: 15px;
+      margin: 20px 0;
+    }
+
+    .quiz-suggestions h3 {
+      color: #2e7d32;
+      margin-top: 0;
+    }
+  </style>
+</head>
+<body>
+  <h2>Your Personalized Skin Care Suggestions</h2>
+  
+  {% if face_detected == 'no' %}
+    <div class="suggestion-box">
+      <h3>No face detected.</h3>
+      <p>Please upload a clear image of your face to get accurate skin and acne analysis.</p>
+    </div>
+  {% else %}
+    <!-- Skin Type Analysis -->
+    {% if skin_type %}
+    <div class="suggestion-box">
+      <h3>Skin Type: {{ skin_type | capitalize }}</h3>
+      <ul>
+        {% if skin_type == 'oily' or skin_type == 'oil' %}
+          <li>Use a foaming cleanser twice daily to control oil.</li>
+          <li>Avoid heavy creams and opt for oil-free moisturizers.</li>
+          <li>Use blotting sheets and non-comedogenic makeup.</li>
+        {% elif skin_type == 'dry' %}
+          <li>Moisturize immediately after washing your face.</li>
+          <li>Avoid alcohol-based toners.</li>
+          <li>Use a hydrating serum and thick night cream.</li>
+        {% elif skin_type == 'normal' %}
+          <li>Maintain a consistent skincare routine with gentle products.</li>
+          <li>Hydrate with light moisturizers daily.</li>
+          <li>Use sunscreen every morning to protect skin from UV rays.</li>
+        {% endif %}
+      </ul>
+    </div>
+    {% endif %}
+
+    <!-- Acne Analysis -->
+    {% if acne %}
+    <div class="suggestion-box">
+      <h3>Acne Severity: {{ acne | replace('_', ' ') | capitalize }}</h3>
+      <ul>
+        {% if acne == 'no_acne' %}
+          <li>Great skin! Maintain your healthy skincare habits.</li>
+          <li>Use sunscreen daily and stay hydrated.</li>
+        {% elif acne == 'mild' %}
+          <li>Use gentle cleansers with salicylic acid.</li>
+          <li>Avoid touching or popping pimples.</li>
+          <li>Use spot treatments like benzoyl peroxide on breakouts.</li>
+        {% elif acne == 'moderate' %}
+          <li>Consider products with benzoyl peroxide or retinoids.</li>
+          <li>Use a mild cleanser and non-comedogenic moisturizer.</li>
+          <li>Consult a dermatologist if needed.</li>
+        {% elif acne == 'severe' or acne == 'very_severe' %}
+          <li>Consult a dermatologist for prescription treatments.</li>
+          <li>Use medication consistently as directed.</li>
+          <li>Avoid harsh scrubs and aggressive treatments.</li>
+        {% endif %}
+      </ul>
+    </div>
+    {% endif %}
+
+    <!-- Quiz Suggestions (shown after quiz completion) -->
+    {% if suggestions and suggestions|length > 0 %}
+    <div class="quiz-suggestions">
+      <h3>Personalized Recommendations Based on Your Quiz</h3>
+      <ul>
+        {% for suggestion in suggestions %}
+          <li>{{ suggestion }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
+    <!-- Navigation Buttons -->
+    <div style="margin-top: 30px;">
+      <!-- Check if quiz is completed using session variable directly -->
+      {% if session.quiz_completed %}
+        <!-- Show Feedback, Next Person and Logout buttons after quiz completion -->
+        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+          <a href="{{ url_for('ai.user_feedback') }}" class="feedback-button">Give Feedback</a>
+          <a href="{{ url_for('ai.analyzer') }}" class="back-button">Next Person</a>
+          <a href="{{ url_for('ai.logout') }}" class="back-button logout-button">Logout</a>
+        </div>
+      {% else %}
+        <!-- Show Quiz button if quiz not completed yet -->
+        <a href="{{ url_for('ai.quiz') }}" class="back-button">Next → Quiz</a>
+      {% endif %}
+    </div>
+  {% endif %}
+
+</body>
+</html>

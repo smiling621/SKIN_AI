@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Register - Derma Soul</title>
+  <link rel="stylesheet" href="{{ url_for('ai.static', filename='style.css') }}">
+</head>
+<body>
+  <section class="container">
+    <h2>Register Your Salon</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <p class="{{ category }}">{{ message }}</p>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+   <form method="POST">
+    
+    <input type="text" name="username" placeholder="Enter Username" required />
+    <input type="email" name="email" placeholder="Email" required><br>
+    <input type="password" name="password" placeholder="Password" required><br>
+    <input type="text" name="salonName" placeholder="Enter Salon Name" required />
+    <button type="submit">Register</button>
+   
+   </form>
+    {% if message %}<p>{{ message }}</p>{% endif %}
+
+    <p>Already have an account? <a href="{{ url_for('ai.login') }}">Login here</a>.</p>
+  </section>
+</body>
+</html>

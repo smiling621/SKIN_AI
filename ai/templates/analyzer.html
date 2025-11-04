@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Derma Soul - Analyzer</title>
+  <link rel="stylesheet" href="{{url_for('ai.static', filename='style.css')}}">
+  <style>
+    .container {
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 30px;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+    
+    h2 {
+      color: #d6336c;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    label {
+      display: block;
+      margin-top: 20px;
+      margin-bottom: 8px;
+      font-weight: bold;
+      color: #333;
+    }
+    
+    input[type="text"], input[type="file"] {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+      margin-bottom: 15px;
+      box-sizing: border-box;
+    }
+    
+    input[type="file"] {
+      padding: 10px;
+    }
+    
+    #imagePreview {
+      display: none;
+      max-width: 100%;
+      max-height: 300px;
+      border-radius: 12px;
+      margin: 20px auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      display: block;
+    }
+    
+    #uploadButton {
+      background: #d6336c;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 10px;
+      transition: background 0.3s;
+    }
+    
+    #uploadButton:hover:not(:disabled) {
+      background: #c0255a;
+    }
+    
+    #uploadButton:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    
+    .loading {
+      display: none;
+      text-align: center;
+      margin: 20px 0;
+      color: #d6336c;
+      font-weight: 600;
+    }
+    
+    .loading::after {
+      content: '';
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #d6336c;
+      border-radius: 50%;
+      border-top-color: transparent;
+      animation: spin 1s ease-in-out infinite;
+      margin-left: 10px;
+      vertical-align: middle;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .error-message, .success-message {
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+      animation: slideDown 0.3s ease-out;
+    }
+
+    .error-message {
+      background: #f8d7da;
+      color: #721c24;
+      border-left: 4px solid #dc3545;
+    }
+
+    .success-message {
+      background: #d4edda;
+      color: #155724;
+      border-left: 4px solid #28a745;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Error Card Styles */
+    .error-card {
+      background: white;
+      border-radius: 15px;
+      padding: 40px;
+      text-align: center;
+      margin-bottom: 30px;
+      animation: slideIn 0.5s ease-out;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .error-icon {
+      font-size: 80px;
+      margin-bottom: 20px;
+      animation: bounce 1.5s ease infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .error-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 15px;
+    }
+
+    .error-description {
+      font-size: 16px;
+      color: #666;
+      margin-bottom: 25px;
+      line-height: 1.6;
+    }
+
+    .error-tips {
+      background: #f8f9fa;
+      border-left: 4px solid #d6336c;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: left;
+      margin: 25px 0;
+    }
+
+    .error-tips strong {
+      color: #333;
+      font-size: 16px;
+      display: block;
+      margin-bottom: 12px;
+    }
+
+    .error-tips ul {
+      margin: 10px 0 0 0;
+      padding-left: 25px;
+    }
+
+    .error-tips li {
+      margin: 10px 0;
+      color: #555;
+      line-height: 1.6;
+    }
+
+    .try-again-btn {
+      display: inline-block;
+      padding: 14px 35px;
+      background: #d6336c;
+      color: white;
+      text-decoration: none;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 16px;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(214, 51, 108, 0.3);
+    }
+
+    .try-again-btn:hover {
+      background: #c0255a;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(214, 51, 108, 0.5);
+      color: white;
+      text-decoration: none;
+    }
+
+    /* Flash messages from backend */
+    .flash-messages {
+      margin-bottom: 20px;
+    }
+
+    .alert {
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      animation: slideDown 0.3s ease-out;
+    }
+
+    .alert-error {
+      background: #f8d7da;
+      color: #721c24;
+      border-left: 4px solid #dc3545;
+    }
+
+    .alert-success {
+      background: #d4edda;
+      color: #155724;
+      border-left: 4px solid #28a745;
+    }
+  </style>
+</head>
+<body>
+  <!-- Flask Flash Messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="container flash-messages">
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- NO FACE DETECTED ERROR -->
+  {% if session.get('show_face_error') %}
+  <section class="container error-card">
+    <div class="error-icon">📷</div>
+    <div class="error-title">No Face Detected</div>
+    <div class="error-description">
+      We couldn't detect a clear face in your uploaded image.
+    </div>
+    
+    <div class="error-tips">
+      <strong>Please make sure:</strong>
+      <ul>
+        <li>Your face is clearly visible and well-lit</li>
+        <li>You're looking directly at the camera</li>
+        <li>The image is not blurry or too dark</li>
+        <li>There are no obstructions covering your face</li>
+      </ul>
+    </div>
+    
+    <a href="{{ url_for('ai.analyzer') }}" class="try-again-btn" onclick="clearErrors()">🔄 Try Again</a>
+  </section>
+  {% endif %}
+
+  <!-- ANIMAL DETECTED ERROR -->
+  {% if session.get('show_animal_error') %}
+  <section class="container error-card">
+    <div class="error-icon">🐾</div>
+    <div class="error-title">Animal Image Detected</div>
+    <div class="error-description">
+      This appears to be an animal image. Please upload a photo of human facial skin.
+    </div>
+    
+    <div class="error-tips">
+      <strong>Tips for best results:</strong>
+      <ul>
+        <li>Use a clear photo of a human face</li>
+        <li>Ensure good lighting conditions</li>
+        <li>Face should be the main subject of the photo</li>
+        <li>Avoid filters or heavy editing</li>
+      </ul>
+    </div>
+    
+    <a href="{{ url_for('ai.analyzer') }}" class="try-again-btn" onclick="clearErrors()">🔄 Try Again</a>
+  </section>
+  {% endif %}
+
+  <!-- REGULAR UPLOAD FORM -->
+  <section class="container">
+    <h2>AI Skin Analyzer</h2>
+
+    <!-- JavaScript Flash Messages -->
+    <div id="flashMessages"></div>
+
+    <!-- Analysis Form -->
+    <form id="analysisForm" method="POST" enctype="multipart/form-data" action="{{ url_for('ai.analyzer') }}">
+      <label for="customerName">Enter your name:</label>
+      <input type="text" id="customerName" name="customerName" placeholder="Your name" required />
+
+      <label for="imageUpload">Upload your photo:</label>
+      <input type="file" id="imageUpload" name="image" accept="image/*" required />
+      <img id="imagePreview" style="display: none;" />
+
+      <button type="submit" id="uploadButton">Analyze My Skin</button>
+    </form>
+
+    <!-- Loading indicator -->
+    <div class="loading" id="loadingIndicator">
+      Analyzing your skin, please wait...
+    </div>
+  </section>
+
+  <script>
+    const imageUpload = document.getElementById('imageUpload');
+    const imagePreview = document.getElementById('imagePreview');
+    const customerNameInput = document.getElementById('customerName');
+    const analysisForm = document.getElementById('analysisForm');
+    const uploadButton = document.getElementById('uploadButton');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+
+    // Clear error session flags
+    function clearErrors() {
+      fetch("{{ url_for('ai.analyzer') }}", {
+        method: 'GET',
+      });
+    }
+
+    // Preview uploaded image
+    imageUpload.addEventListener('change', function() {
+      const file = this.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function() {
+          imagePreview.src = reader.result;
+          imagePreview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      } else {
+        imagePreview.style.display = 'none';
+      }
+    });
+
+    // Handle form submission
+    analysisForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const name = customerNameInput.value.trim();
+      const file = imageUpload.files[0];
+
+      // Validation
+      if (!name) {
+        showMessage('Please enter your name.', 'error');
+        return;
+      }
+
+      if (!file) {
+        showMessage('Please select an image to upload.', 'error');
+        return;
+      }
+
+      // Check file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/bmp'];
+      if (!allowedTypes.includes(file.type)) {
+        showMessage('Please upload a valid image file (JPEG, PNG, GIF, or BMP).', 'error');
+        return;
+      }
+
+      // Check file size (16MB limit)
+      const maxSize = 16 * 1024 * 1024;
+      if (file.size > maxSize) {
+        showMessage('File size too large. Please upload an image smaller than 16MB.', 'error');
+        return;
+      }
+
+      // Show loading state
+      uploadButton.disabled = true;
+      uploadButton.textContent = 'Analyzing...';
+      loadingIndicator.style.display = 'block';
+      document.getElementById('flashMessages').innerHTML = '';
+
+      // Submit form normally (let Flask handle it)
+      analysisForm.submit();
+    });
+
+    // Helper function to show messages
+    function showMessage(message, type) {
+      const flashMessages = document.getElementById('flashMessages');
+      const messageClass = type === 'error' ? 'error-message' : 'success-message';
+      
+      flashMessages.innerHTML = `<div class="${messageClass}">${message}</div>`;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      
+      setTimeout(() => {
+        flashMessages.innerHTML = '';
+      }, 5000);
+    }
+
+    // Clear messages when user starts interacting
+    customerNameInput.addEventListener('input', () => {
+      document.getElementById('flashMessages').innerHTML = '';
+    });
+
+    imageUpload.addEventListener('change', () => {
+      document.getElementById('flashMessages').innerHTML = '';
+    });
+
+    // Auto-hide flash messages after 5 seconds
+    window.addEventListener('DOMContentLoaded', () => {
+      const flashAlerts = document.querySelectorAll('.alert');
+      flashAlerts.forEach(alert => {
+        setTimeout(() => {
+          alert.style.transition = 'opacity 0.5s';
+          alert.style.opacity = '0';
+          setTimeout(() => alert.remove(), 500);
+        }, 5000);
+      });
+    });
+  </script>
+</body>
+</html>

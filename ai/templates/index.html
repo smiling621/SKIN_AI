@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Derma Soul - AI Skin Analysis</title>
+  <link rel="stylesheet" href="{{ url_for('ai.static', filename='style.css') }}">
+  <script src="{{ url_for('ai.static', filename='script.js') }}" defer></script>
+
+</head>
+<body>
+  <!-- Navigation -->
+<header>
+  <nav>
+    <div class="logo-text">Derma Soul</div>
+    <ul>
+      <li><a href="#hero">Home</a></li>
+      <li><a href="#ai">About</a></li>
+      <li><a href="#contact">Contact Us</a></li>
+    </ul>
+  </nav>
+</header>
+
+  <!-- Hero Section -->
+  <section id="hero">
+    <h1>Skin Analysis Using AI</h1>
+    <p>Powering your skincare routine with artificial intelligence</p>
+  </section>
+
+  <!-- AI Section -->
+  <section id="ai" class="ai-section">
+    <div class="ai-right">
+      <h2>How It Works</h2>
+      <p>Derma Soul uses AI to analyze your uploaded skin photo and quiz responses to determine your skin type, skin tone, and acne severity. Personalized skincare advice is then provided to help you make informed decisions.</p>
+    </div>
+  </section>
+
+  <!-- Skin Types Section -->
+  <section class="skin-types">
+    <h2>Skin Types</h2>
+    <div class="skin-grid">
+      <div class="skin-card">
+        <img src="{{ url_for('ai.static', filename='images/normal.jpg') }}" alt="Normal Skin" />
+        <h3>Normal Skin</h3>
+        <p>Balanced, not too oily or dry. Few imperfections. Pores are not visible. Skin feels fresh and healthy.</p>
+      </div>
+      <div class="skin-card">
+        <img src="{{ url_for('ai.static', filename='images/oily.jpg') }}" alt="Oily Skin" />
+        <h3>Oily Skin</h3>
+        <p>Shiny appearance, larger pores, and frequent breakouts. Needs oil control and lightweight skincare products.</p>
+      </div>
+      <div class="skin-card">
+        <img src="{{ url_for('ai.static', filename='images/dry.jpg') }}" alt="Dry Skin" />
+        <h3>Dry Skin</h3>
+        <p>Feels tight, rough, or flaky. Needs deep hydration and gentle cleansers to maintain moisture levels.</p>
+      </div>
+    </div>
+  </section>
+
+ 
+<div class="home-auth-buttons">
+  <h1>Welcome, {{ user }}!</h1>
+<form method="GET" action="{{ url_for('ai.analyzer') }}"  style="display: inline-block;">
+  
+  <button type="submit" style="background-color: #d6336c; color: white; border: none; border-radius: 6px; padding: 10px 20px; cursor: pointer; margin-right: 10px;">
+    Analyze Skin
+  </button>
+</form>
+
+
+<form method="GET" action="{{ url_for('ai.logout') }}" style="display: inline-block;">
+  <button type="submit" style="background-color: #6c757d; color: white; border: none; border-radius: 6px; padding: 10px 20px; cursor: pointer;">Logout</button>
+</form>
+</div>
+
+
+
+  <!-- Footer -->
+  <footer id="contact">
+    <p>&copy; 2025 Derma Soul. All rights reserved.</p>
+  </footer>
+</body>
+</html>
