@@ -8,15 +8,18 @@
       <th>ID</th>
       <th>Username</th>
       <th>Role</th>
+      {% if session.role == 'admin' %}
       <th>Actions</th>
+      {% endif %}
     </tr>
   </thead>
   <tbody>
     {% for user in users %}
     <tr>
-      <td>{{ user.id }}</td>
+      <td>{{ user.user_id }}</td>
       <td>{{ user.username }}</td>
       <td>{{ user.role }}</td>
+      {% if session.role == 'admin' %}
       <td>
         <a href="{{ url_for('admin_bp.reset_user_password', user_id=user.user_id) }}" class="btn btn-warning btn-sm">
             Reset Password
@@ -26,6 +29,7 @@
           Delete
         </a>
       </td>
+      {% endif %}
     </tr>
     {% endfor %}
   </tbody>

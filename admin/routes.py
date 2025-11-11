@@ -38,6 +38,16 @@ def admin_required(f):
     def decorated(*args, **kwargs):
         if session.get('role') != 'admin':
             flash("Admin access required.")
+            return redirect(url_for('admin_bp.dashboard'))
+        return f(*args, **kwargs)
+    return decorated
+
+def staff_or_admin_required(f):
+    """Allow both staff and admin to access"""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if session.get('role') not in ['admin', 'staff']:
+            flash("Access denied.")
             return redirect(url_for('admin_bp.login'))
         return f(*args, **kwargs)
     return decorated
@@ -50,9 +60,9 @@ def login():
         password = request.form['password']
 
         conn = get_db_connection()
-        # Check in User table with role='admin'
+        # Check for both admin AND staff users
         user = conn.execute(
-            'SELECT * FROM User WHERE username=? AND role="admin"',
+            'SELECT * FROM User WHERE username=? AND role IN ("admin", "staff")',
             (username,)
         ).fetchone()
         conn.close()
@@ -63,9 +73,20 @@ def login():
             session['user_id'] = user['user_id']
             return redirect(url_for('admin_bp.dashboard'))
         else:
-            flash("Invalid admin credentials")
+            flash("Invalid credentials")
 
     return render_template('admin_login.html')
+
+
+def staff_or_admin_required(f):
+    """Allow both staff and admin to access"""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if session.get('role') not in ['admin', 'staff']:
+            flash("Access denied.")
+            return redirect(url_for('admin_bp.login'))
+        return f(*args, **kwargs)
+    return decorated
 
 
 @admin_bp.route('/logout')
@@ -75,7 +96,7 @@ def logout():
 
 
 @admin_bp.route('/dashboard')
-@admin_required
+@staff_or_admin_required  # Changed to allow staff
 def dashboard():
     conn = get_db_connection()
     users_count = conn.execute('SELECT COUNT(*) FROM User WHERE role="staff"').fetchone()[0]
@@ -92,7 +113,7 @@ def dashboard():
 
 
 @admin_bp.route('/users')
-@admin_required
+@staff_or_admin_required  # Changed to allow staff
 def users():
     conn = get_db_connection()
     # Get all users (staff and admin)
@@ -102,7 +123,7 @@ def users():
 
 
 @admin_bp.route('/delete/<int:user_id>')
-@admin_required
+@admin_required  # Keep admin only
 def delete_user(user_id):
     conn = get_db_connection()
     user = conn.execute('SELECT * FROM User WHERE user_id = ?', (user_id,)).fetchone()
@@ -149,7 +170,7 @@ def delete_user(user_id):
 
 
 @admin_bp.route('/reset/<int:user_id>', methods=['GET', 'POST'])
-@admin_required
+@admin_required  # Keep admin only
 def reset_user_password(user_id):
     conn = get_db_connection()
     user = conn.execute('SELECT * FROM User WHERE user_id = ?', (user_id,)).fetchone()
@@ -179,7 +200,7 @@ def reset_user_password(user_id):
 
 
 @admin_bp.route('/feedback')
-@admin_required
+@staff_or_admin_required  # Changed to allow staff
 def feedback():
     conn = get_db_connection()
     # Join with User table to get username, use 'Anonymous User' for NULL usernames
@@ -200,7 +221,7 @@ def feedback():
 
 
 @admin_bp.route('/predictions')
-@admin_required
+@staff_or_admin_required  # Changed to allow staff
 def predictions():
     # Check if clear filter is requested
     if request.args.get('clear') == 'true':
@@ -252,7 +273,7 @@ def predictions():
 
 
 @admin_bp.route('/customers')
-@admin_required
+@staff_or_admin_required  # Changed to allow staff
 def customers():
     """View all customers with their latest analysis"""
     conn = get_db_connection()
@@ -283,7 +304,7 @@ def customers():
 
 
 @admin_bp.route('/analyses')
-@admin_required
+@staff_or_admin_required  # Changed to allow staff
 def analyses():
     """View all skin analyses"""
     conn = get_db_connection()
