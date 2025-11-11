@@ -109,8 +109,8 @@ def ai_predict(image_path):
         skin_preds = skin_model.predict(region_expanded, verbose=0)[0]
         acne_preds = acne_model.predict(region_expanded, verbose=0)[0]
 
-        # 🔥 EMERGENCY FIX: Print raw predictions for debugging
-        print(f"\n🔍 Raw Model Predictions:")
+        #  EMERGENCY FIX: Print raw predictions for debugging
+        print(f"\n Raw Model Predictions:")
         print(f"   Skin confidences: {dict(zip(skin_classes, [f'{p:.2%}' for p in skin_preds]))}")
         print(f"   Acne confidences: {dict(zip(acne_classes, [f'{p:.2%}' for p in acne_preds]))}")
 
@@ -120,22 +120,22 @@ def ai_predict(image_path):
         skin_type = skin_classes[np.argmax(skin_preds)]
         acne_type = acne_classes[np.argmax(acne_preds)]
 
-        print(f"\n📊 Initial Predictions (before filtering):")
+        print(f"\n Initial Predictions (before filtering):")
         print(f"   Skin: {skin_type} ({skin_conf:.2%})")
         print(f"   Acne: {acne_type} ({acne_conf:.2%})")
 
-        # 🔥 CRITICAL FIX: Very conservative thresholds
+        #  CRITICAL FIX: Very conservative thresholds
         
         # Skin type threshold
         if skin_conf < 0.45:
             skin_type = "uncertain"
-            print(f"   ⚠️ Skin confidence too low, marked as uncertain")
+            print(f"    Skin confidence too low, marked as uncertain")
 
-        # 🔥 ACNE FIX: Default to no_acne unless VERY confident
+        #  ACNE FIX: Default to no_acne unless VERY confident
         no_acne_idx = acne_classes.index('no_acne')
         no_acne_confidence = acne_preds[no_acne_idx]
         
-        print(f"\n🔍 Acne Analysis:")
+        print(f"\n Acne Analysis:")
         print(f"   Predicted class: {acne_type}")
         print(f"   Predicted confidence: {acne_conf:.2%}")
         print(f"   'no_acne' confidence: {no_acne_confidence:.2%}")
@@ -148,16 +148,16 @@ def ai_predict(image_path):
             # Model thinks there's acne
             if acne_conf < 0.70:
                 # Not confident enough
-                print(f"   ⚠️ Acne confidence {acne_conf:.2%} < 70%, defaulting to no_acne")
+                print(f"    Acne confidence {acne_conf:.2%} < 70%, defaulting to no_acne")
                 acne_type = 'no_acne'
                 acne_conf = max(no_acne_confidence, 0.5)
             elif no_acne_confidence > 0.30:
                 # Model is confused - no_acne also has decent score
-                print(f"   ⚠️ Conflicting predictions (no_acne: {no_acne_confidence:.2%}), defaulting to no_acne")
+                print(f"    Conflicting predictions (no_acne: {no_acne_confidence:.2%}), defaulting to no_acne")
                 acne_type = 'no_acne'
                 acne_conf = no_acne_confidence
             else:
-                print(f"   ✅ High confidence acne detection: {acne_type} ({acne_conf:.2%})")
+                print(f"    High confidence acne detection: {acne_type} ({acne_conf:.2%})")
         else:
             # Model predicts no_acne
             if no_acne_confidence < 0.40:
@@ -169,22 +169,22 @@ def ai_predict(image_path):
                     # There's a very confident acne prediction
                     acne_type = acne_classes[np.argmax(acne_only_preds) + 1]
                     acne_conf = max_acne_conf
-                    print(f"   🔄 Overriding to {acne_type} ({acne_conf:.2%}) due to very high confidence")
+                    print(f"    Overriding to {acne_type} ({acne_conf:.2%}) due to very high confidence")
                 else:
-                    print(f"   ⚠️ Low no_acne confidence but no strong acne signal, keeping no_acne")
+                    print(f"    Low no_acne confidence but no strong acne signal, keeping no_acne")
                     acne_conf = 0.5
             else:
-                print(f"   ✅ Clear skin detected: no_acne ({no_acne_confidence:.2%})")
+                print(f"    Clear skin detected: no_acne ({no_acne_confidence:.2%})")
                 acne_conf = no_acne_confidence
 
-        # 🔥 If no face detected, be EXTREMELY conservative
+        #  If no face detected, be EXTREMELY conservative
         if not face_detected:
             if acne_conf < 0.80:
-                print(f"   ⚠️ No face detected + confidence {acne_conf:.2%} < 80%, forcing no_acne")
+                print(f"    No face detected + confidence {acne_conf:.2%} < 80%, forcing no_acne")
                 acne_type = 'no_acne'
                 acne_conf = 0.5
 
-        print(f"\n✅ FINAL Predictions:")
+        print(f"\n FINAL Predictions:")
         print(f"   Skin: {skin_type} ({skin_conf:.2%})")
         print(f"   Acne: {acne_type} ({acne_conf:.2%})")
         print(f"   Face detected: {face_detected}")
@@ -198,7 +198,7 @@ def ai_predict(image_path):
         }
 
     except Exception as e:
-        print(f"❌ Prediction error: {str(e)}")
+        print(f" Prediction error: {str(e)}")
         import traceback
         traceback.print_exc()
         return {"error": f"Unexpected error during prediction: {str(e)}"}
@@ -210,7 +210,7 @@ def test_prediction(image_path):
     print(f"Testing: {image_path}")
     print(f"{'='*60}")
     result = ai_predict(image_path)
-    print(f"\n📋 Final Results:")
+    print(f"\n Final Results:")
     for key, value in result.items():
         if isinstance(value, float):
             print(f"   {key}: {value:.2%}" if value <= 1.0 else f"   {key}: {value}")
