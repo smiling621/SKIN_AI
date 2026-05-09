@@ -1,4 +1,4 @@
-# SKIN_AI - AI Skin Analysis System
+#AI-Based Acne Classification and Recommendation System for Low-Resource Environments
 
 AI-powered skin analysis and personalized skincare recommendations for salons.
 
